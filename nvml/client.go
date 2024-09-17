@@ -41,17 +41,18 @@ type FingerprintData struct {
 // it represents statistics data returned for every Nvidia device
 type StatsData struct {
 	*DeviceData
-	PowerUsageW        *uint
-	GPUUtilization     *uint
-	MemoryUtilization  *uint
-	EncoderUtilization *uint
-	DecoderUtilization *uint
-	TemperatureC       *uint
-	UsedMemoryMiB      *uint64
-	BAR1UsedMiB        *uint64
-	ECCErrorsL1Cache   *uint64
-	ECCErrorsL2Cache   *uint64
-	ECCErrorsDevice    *uint64
+	PowerUsageW            *uint
+	GPUUtilization         *uint
+	MemoryUtilization      *uint
+	EncoderUtilization     *uint
+	EncoderSessionsRunning *uint
+	DecoderUtilization     *uint
+	TemperatureC           *uint
+	UsedMemoryMiB          *uint64
+	BAR1UsedMiB            *uint64
+	ECCErrorsL1Cache       *uint64
+	ECCErrorsL2Cache       *uint64
+	ECCErrorsDevice        *uint64
 }
 
 // NvmlClient describes how users would use nvml library
@@ -164,6 +165,7 @@ func (c *nvmlClient) GetStatsData() ([]*StatsData, error) {
 	   9  - ECC Errors on requesting L1Cache       # nvmlDeviceGetMemoryErrorCounter
 	   10 - ECC Errors on requesting L2Cache       # nvmlDeviceGetMemoryErrorCounter
 	   11 - ECC Errors on requesting Device memory # nvmlDeviceGetMemoryErrorCounter
+	   12 - Count of Encoder Sessions              # nvmlDeviceGetEncoderSessions
 	*/
 
 	// Assumed that this method is called with receiver retrieved from
@@ -200,17 +202,18 @@ func (c *nvmlClient) GetStatsData() ([]*StatsData, error) {
 				PowerW:     deviceInfo.PowerW,
 				BAR1MiB:    deviceInfo.BAR1MiB,
 			},
-			PowerUsageW:        deviceStatus.PowerUsageW,
-			GPUUtilization:     deviceStatus.GPUUtilization,
-			MemoryUtilization:  deviceStatus.MemoryUtilization,
-			EncoderUtilization: deviceStatus.EncoderUtilization,
-			DecoderUtilization: deviceStatus.DecoderUtilization,
-			TemperatureC:       deviceStatus.TemperatureC,
-			UsedMemoryMiB:      deviceStatus.UsedMemoryMiB,
-			BAR1UsedMiB:        deviceStatus.BAR1UsedMiB,
-			ECCErrorsL1Cache:   deviceStatus.ECCErrorsL1Cache,
-			ECCErrorsL2Cache:   deviceStatus.ECCErrorsL2Cache,
-			ECCErrorsDevice:    deviceStatus.ECCErrorsDevice,
+			PowerUsageW:            deviceStatus.PowerUsageW,
+			GPUUtilization:         deviceStatus.GPUUtilization,
+			MemoryUtilization:      deviceStatus.MemoryUtilization,
+			EncoderUtilization:     deviceStatus.EncoderUtilization,
+			EncoderSessionsRunning: deviceStatus.EncoderSessionsRunning,
+			DecoderUtilization:     deviceStatus.DecoderUtilization,
+			TemperatureC:           deviceStatus.TemperatureC,
+			UsedMemoryMiB:          deviceStatus.UsedMemoryMiB,
+			BAR1UsedMiB:            deviceStatus.BAR1UsedMiB,
+			ECCErrorsL1Cache:       deviceStatus.ECCErrorsL1Cache,
+			ECCErrorsL2Cache:       deviceStatus.ECCErrorsL2Cache,
+			ECCErrorsDevice:        deviceStatus.ECCErrorsDevice,
 		})
 
 		slices.SortFunc(allNvidiaGPUStats, func(a, b *StatsData) int {

@@ -273,7 +273,7 @@ func (n *nvmlDriver) DeviceInfoAndStatusByUUID(uuid string) (*DeviceInfo, *Devic
 
 	// MIG devices don't have temperature, power usage or utilization properties
 	// so just nil them out.
-	utzGPU, utzMem, utzEncU, utzDecU := uint(0), uint(0), uint(0), uint(0)
+	utzGPU, utzMem, utzEncU, utzEncSessU, utzDecU := uint(0), uint(0), uint(0), uint(0), uint(0)
 	powerU, tempU := uint(0), uint(0)
 	if !isMig {
 		utz, code := nvml.DeviceGetUtilizationRates(device)
@@ -288,6 +288,12 @@ func (n *nvmlDriver) DeviceInfoAndStatusByUUID(uuid string) (*DeviceInfo, *Devic
 			return nil, nil, decode("failed to get device encoder utilization", code)
 		}
 		utzEncU = uint(utzEnc)
+
+		utzEncSess, _, code := nvml.DeviceGetEncoderSessions(device)
+		if code != nvml.SUCCESS {
+			return nil, nil, decode("failed to get device encoder session count", code)
+		}
+		utzEncSessU = uint(utzEncSess)
 
 		utzDec, _, code := nvml.Device.GetDecoderUtilization(device)
 		if code != nvml.SUCCESS {
@@ -326,17 +332,18 @@ func (n *nvmlDriver) DeviceInfoAndStatusByUUID(uuid string) (*DeviceInfo, *Devic
 	}
 
 	return di, &DeviceStatus{
-		TemperatureC:          &tempU,
-		GPUUtilization:        &utzGPU,
-		MemoryUtilization:     &utzMem,
-		EncoderUtilization:    &utzEncU,
-		DecoderUtilization:    &utzDecU,
-		UsedMemoryMiB:         &memUsedU,
-		PowerUsageW:           &powerU,
-		BAR1UsedMiB:           &barUsed,
-		ECCErrorsDevice:       &ecc.DeviceMemory,
-		ECCErrorsL1Cache:      &ecc.L1Cache,
-		ECCErrorsL2Cache:      &ecc.L2Cache,
-		ECCErrorsRegisterFile: &ecc.RegisterFile,
+		TemperatureC:           &tempU,
+		GPUUtilization:         &utzGPU,
+		MemoryUtilization:      &utzMem,
+		EncoderUtilization:     &utzEncU,
+		EncoderSessionsRunning: &utzEncSessU,
+		DecoderUtilization:     &utzDecU,
+		UsedMemoryMiB:          &memUsedU,
+		PowerUsageW:            &powerU,
+		BAR1UsedMiB:            &barUsed,
+		ECCErrorsDevice:        &ecc.DeviceMemory,
+		ECCErrorsL1Cache:       &ecc.L1Cache,
+		ECCErrorsL2Cache:       &ecc.L2Cache,
+		ECCErrorsRegisterFile:  &ecc.RegisterFile,
 	}, nil
 }

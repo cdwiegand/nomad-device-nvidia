@@ -70,4 +70,5 @@ type DeviceStatus struct {
 	ECCErrorsL2Cache      *uint64
 	ECCErrorsDevice       *uint64
 	ECCErrorsRegisterFile *uint64
+	EncoderSessions       *uint
 }
